@@ -4,19 +4,47 @@ public class PlayerCharacter : BaseCharacter
 {
     [Header("Yetenekler")]
     public BaseSkill currentSkill; // Oyuncunun şu anki yeteneği
+    private PlayerStats playerStats;
 
     private float skillCooldownTimer = 0f;
+
+    protected override void Awake()
+    {
+        base.Awake(); // BaseCharacter'daki Awake'i çağırmak önemli!
+        playerStats = GetComponent<PlayerStats>();
+    }
 
     // Update metodunu basitleştiriyoruz.
     void Update()
     {
         HandleMovement();
         HandleCooldown();
+        HandleAttack();
+
+        // --- YENİ EKLENEN SATIR ---
+        HandleStatSpending();
+        // --- YENİ SATIR SONU ---
 
         // Sol tıka basıldığında ve bekleme süresi dolduğunda saldır
         if (Input.GetMouseButtonDown(0) && skillCooldownTimer <= 0)
         {
             Attack();
+        }
+    }
+
+    private void HandleStatSpending()
+    {
+        if (Input.GetKeyDown(KeyCode.Alpha1)) // Klavyenin üstündeki 1 tuşu
+        {
+            playerStats.SpendStatPoint(StatType.Strength);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha2)) // 2 tuşu
+        {
+            playerStats.SpendStatPoint(StatType.Dexterity);
+        }
+        else if (Input.GetKeyDown(KeyCode.Alpha3)) // 3 tuşu
+        {
+            playerStats.SpendStatPoint(StatType.Intelligence);
         }
     }
 
