@@ -32,6 +32,7 @@ public class FlatlandMap : BaseMap
     public override void OnEnemyKilled()
     {
         enemiesToWin--;
+        Debug.Log("Bir düşman öldürüldü! Kalan düşman sayısı: " + enemiesToWin);
         if (enemiesToWin <= 0)
         {
             WinGame();

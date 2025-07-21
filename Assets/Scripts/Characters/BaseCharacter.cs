@@ -55,7 +55,16 @@ public abstract class BaseCharacter : MonoBehaviour
     }
     // --- YENİ METOT SONU ---
     // Bu metodu BaseCharacter sınıfının en altına ekle
-
+    public int GetBaseStat(StatType stat)
+    {
+        switch (stat)
+        {
+            case StatType.Strength: return strength;
+            case StatType.Dexterity: return dexterity;
+            case StatType.Intelligence: return intelligence;
+            default: return 0;
+        }
+    }
     public void AddToStat(StatType stat, int amount)
     {
         switch (stat)

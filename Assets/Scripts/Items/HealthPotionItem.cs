@@ -17,13 +17,11 @@ public class HealthPotionItem : BaseItem
     public override void Use(BaseCharacter user)
     {
         base.Use(user); // "Sağlık İksiri kullanıldı." mesajını yazdırmak için ana metodu çağırıyoruz.
-        
+
         // Eşyayı kullanan karakterin canını artır.
         // Şimdilik canı doğrudan artırıyoruz, ileride BaseCharacter'a bir Heal() metodu ekleyebiliriz.
         user.TakeDamage(-healAmount); // Negatif hasar vermek, canı artırmak için basit bir yöntem.
-        
+
         Debug.Log(user.name + " " + healAmount + " can yeniledi.");
-        
-        // TODO: İksiri envanterden sil. Bu kısmı envanter sistemini yazınca yapacağız.
     }
 }

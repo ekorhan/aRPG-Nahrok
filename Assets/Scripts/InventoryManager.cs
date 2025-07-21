@@ -39,4 +39,44 @@ public class InventoryManager : MonoBehaviour
             // TODO: Envanter arayüzünü (UI) güncelle.
         }
     }
+    public void UseFirstConsumable(BaseCharacter user)
+    {
+        BaseItem itemToUse = null;
+
+        // Envanterdeki eşyalar arasında dön.
+        foreach (BaseItem item in items)
+        {
+            // Türü "Consumable" olan ilk eşyayı bul.
+            if (item.type == ItemType.Consumable)
+            {
+                itemToUse = item;
+                break; // İlkini bulduktan sonra döngüden çık.
+            }
+        }
+
+        // Kullanılacak bir eşya bulunduysa...
+        if (itemToUse != null)
+        {
+            // 1. Eşyanın kendi "Use" metodunu çağır (örneğin iksirin can vermesi).
+            itemToUse.Use(user);
+
+            // 2. Kullandıktan sonra eşyayı envanterden sil.
+            RemoveItem(itemToUse);
+        }
+        else
+        {
+            Debug.Log("Kullanılacak tüketilebilir eşya bulunamadı.");
+        }
+    }
+    public void EquipItem(EquipmentItem item, BaseCharacter user)
+    {
+        // Karakterin ekipman yöneticisine ulaş ve eşyayı giydir.
+        CharacterEquipment characterEquipment = user.GetComponent<CharacterEquipment>();
+        if (characterEquipment != null)
+        {
+            characterEquipment.Equip(item);
+            // Eşya giyildiği için envanterden kaldır.
+            RemoveItem(item);
+        }
+    }
 }

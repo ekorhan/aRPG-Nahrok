@@ -15,5 +15,5 @@ MonoBehaviour:
   skillName: Bow
   skillDescription: Hedefe basit bir ok atar.
   cooldown: 0
-  damage: 35
+  damage: 150
   attackRange: 100

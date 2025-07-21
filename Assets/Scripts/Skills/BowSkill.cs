@@ -9,10 +9,10 @@ public class BowSkill : BaseSkill
     public float attackRange = 100f; // Yumruğun ne kadar uzağa "ulaşabildiği"
 
     // BaseSkill'den gelen zorunlu metodu dolduruyoruz.
-    public override void Activate(BaseCharacter caster)
+    public override bool Activate(BaseCharacter caster)
     {
         Camera mainCamera = Camera.main;
-        if (mainCamera == null) return;
+        if (mainCamera == null) return false;
 
         // 1. ADIM: Menzil sınırı OLMADAN bir ışın göndererek neye tıkladığımızı öğrenelim.
         // Mathf.Infinity, "sonsuz menzil" anlamına gelir.
@@ -23,7 +23,7 @@ public class BowSkill : BaseSkill
             if (hit.collider.TryGetComponent<BaseCharacter>(out BaseCharacter target))
             {
                 // Kendimize tıklamadığımızdan emin olalım.
-                if (target == caster) return;
+                if (target == caster) return false;
 
                 // 2. ADIM: Tıkladığımız hedef ile bizim aramızdaki mesafeyi ölçelim.
                 float distanceToTarget = Vector3.Distance(caster.transform.position, target.transform.position);
@@ -34,6 +34,7 @@ public class BowSkill : BaseSkill
                     // Menzil içindeyiz! Saldırıyı gerçekleştir.
                     Debug.Log(caster.name + ", " + target.name + " hedefine '" + skillName + "' yeteneğini kullandı!");
                     target.TakeDamage(damage);
+                    return true; // Başarılı bir şekilde yetenek aktive edildi.
                 }
                 else
                 {
@@ -45,5 +46,6 @@ public class BowSkill : BaseSkill
                 }
             }
         }
+        return false; // Eğer hiçbir şey tıklanmadıysa veya menzil dışındaysa, yetenek aktive edilmedi.
     }
 }

@@ -1,60 +1,138 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(PlayerStats))]
+[RequireComponent(typeof(CharacterEquipment))]
+[RequireComponent(typeof(Animator))]
 public class PlayerCharacter : BaseCharacter
 {
     [Header("Yetenekler")]
-    public BaseSkill currentSkill; // Oyuncunun şu anki yeteneği
+    public BaseSkill currentSkill;
+
+    private Rigidbody rb;
     private PlayerStats playerStats;
-
+    private Animator animator;
+    private Vector3 movementInput;
     private float skillCooldownTimer = 0f;
-
+    private bool isMovementLocked = false;
+    [Header("Rotation Settings")]
+    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private float rotationSpeed = 10f;
     protected override void Awake()
     {
-        base.Awake(); // BaseCharacter'daki Awake'i çağırmak önemli!
+        base.Awake();
+        rb = GetComponent<Rigidbody>();
         playerStats = GetComponent<PlayerStats>();
+        animator = GetComponent<Animator>();
     }
 
-    // Update metodunu basitleştiriyoruz.
     void Update()
     {
-        HandleMovement();
-        HandleCooldown();
-        HandleAttack();
+        if (!isMovementLocked)
+        {
+            float horizontal = Input.GetAxis("Horizontal");
+            float vertical = Input.GetAxis("Vertical");
+            movementInput = new Vector3(horizontal, 0, vertical);
+        }
+        else // Hareket kilitliyse, girdi vektörünü sıfırla.
+        {
+            movementInput = Vector3.zero;
+        }
 
-        // --- YENİ EKLENEN SATIR ---
+        UpdateAnimator(movementInput);
+
+        HandleAttackInput();
         HandleStatSpending();
-        // --- YENİ SATIR SONU ---
+        HandleItemUseInput();
+        HandleCooldown();
+        HandleRotation();
+    }
+    void FixedUpdate()
+    {
+        HandleMovement();
+    }
+    private void HandleRotation()
+    {
+        // Ana kameradan fare imlecinin olduğu yere bir ışın oluştur.
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
 
-        // Sol tıka basıldığında ve bekleme süresi dolduğunda saldır
+        // Bu ışın "Ground" katmanındaki bir nesneye çarparsa...
+        if (Physics.Raycast(ray, out RaycastHit hitInfo, Mathf.Infinity, groundLayer))
+        {
+            // Karakterin pozisyonundan ışının çarptığı noktaya bir yön belirle.
+            var direction = hitInfo.point - transform.position;
+            direction.y = 0; // Karakterin yukarı/aşağı eğilmesini engelle.
+
+            // Eğer bir yön varsa (karakter kendi üzerine tıklamadıysa)
+            if (direction.magnitude > 0.1f)
+            {
+                // O yöne doğru bir rotasyon oluştur.
+                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                // Karakterin mevcut rotasyonundan hedef rotasyona doğru yumuşak bir geçiş yap.
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
+            }
+        }
+    }
+
+    public void LockMovement()
+    {
+        isMovementLocked = true;
+    }
+
+    public void UnlockMovement()
+    {
+        isMovementLocked = false;
+    }
+
+    private void UpdateAnimator(Vector3 movement)
+    {
+        animator.SetFloat("Speed", movement.magnitude);
+        Vector3 localVelocity = transform.InverseTransformDirection(movement.normalized);
+        animator.SetFloat("VelocityX", localVelocity.x);
+        animator.SetFloat("VelocityZ", localVelocity.z);
+    }
+
+    private void HandleMovement()
+    {
+        Vector3 normalizedMovement = movementInput.normalized;
+        // Time.deltaTime yerine Time.fixedDeltaTime kullanıyoruz.
+        rb.MovePosition(rb.position + normalizedMovement * moveSpeed * Time.fixedDeltaTime);
+    }
+
+    private void HandleAttackInput()
+    {
         if (Input.GetMouseButtonDown(0) && skillCooldownTimer <= 0)
         {
             Attack();
         }
     }
 
-    private void HandleStatSpending()
+    private void HandleItemUseInput()
     {
-        if (Input.GetKeyDown(KeyCode.Alpha1)) // Klavyenin üstündeki 1 tuşu
+        if (Input.GetKeyDown(KeyCode.E))
         {
-            playerStats.SpendStatPoint(StatType.Strength);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha2)) // 2 tuşu
-        {
-            playerStats.SpendStatPoint(StatType.Dexterity);
-        }
-        else if (Input.GetKeyDown(KeyCode.Alpha3)) // 3 tuşu
-        {
-            playerStats.SpendStatPoint(StatType.Intelligence);
+            InventoryManager.Instance.UseFirstConsumable(this);
         }
     }
 
-    private void HandleMovement()
+    public override void Attack()
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        if (currentSkill != null)
+        {
+            bool isTriggred = currentSkill.Activate(this);
+            skillCooldownTimer = currentSkill.cooldown;
+            if (isTriggred)
+            {
+                animator.SetTrigger("Attack");
+            }
+        }
+    }
 
-        Vector3 movement = new Vector3(horizontal, 0, vertical);
-        transform.Translate(movement * moveSpeed * Time.deltaTime, Space.World);
+    protected override void Die()
+    {
+        animator.SetTrigger("Die");
+        this.enabled = false;
+        GetComponent<Collider>().enabled = false;
     }
 
     private void HandleCooldown()
@@ -65,17 +143,10 @@ public class PlayerCharacter : BaseCharacter
         }
     }
 
-    // Attack metodu artık çok basit! Sadece kuşanılmış yeteneği aktive ediyor.
-    public override void Attack()
+    private void HandleStatSpending()
     {
-        if (currentSkill != null)
-        {
-            currentSkill.Activate(this); // "this" ile yeteneği kimin kullandığını (kendimizi) söylüyoruz.
-            skillCooldownTimer = currentSkill.cooldown; // Yeteneğin bekleme süresini başlat.
-        }
-        else
-        {
-            Debug.LogWarning("Kuşanılmış bir yetenek yok!");
-        }
+        if (Input.GetKeyDown(KeyCode.Alpha1)) { playerStats.SpendStatPoint(StatType.Strength); }
+        else if (Input.GetKeyDown(KeyCode.Alpha2)) { playerStats.SpendStatPoint(StatType.Dexterity); }
+        else if (Input.GetKeyDown(KeyCode.Alpha3)) { playerStats.SpendStatPoint(StatType.Intelligence); }
     }
 }

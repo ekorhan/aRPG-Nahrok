@@ -13,5 +13,5 @@ public abstract class BaseSkill : ScriptableObject // MonoBehaviour yerine Scrip
 
     // Her yetenek, nasıl aktive olacağını kendi içinde tanımlamalı.
     // "caster" parametresi, bu yeteneği kimin kullandığını belirtir (Oyuncu mu, canavar mı?).
-    public abstract void Activate(BaseCharacter caster);
+    public abstract bool Activate(BaseCharacter caster);
 }
