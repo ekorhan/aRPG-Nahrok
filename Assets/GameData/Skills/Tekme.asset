@@ -15,7 +15,7 @@ MonoBehaviour:
   skillName: Tekme
   skillDescription: "\xD6n\xFCndeki \xE7eyrek dairelik bir alana hasar verir."
   cooldown: 1.5
-  baseDamage: 5
+  baseDamage: 122
   kickRadius: 3
   kickAngle: 90
   strengthScaling: 1.5

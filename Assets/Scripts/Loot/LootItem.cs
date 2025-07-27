@@ -2,12 +2,10 @@ using UnityEngine;
 
 public class LootItem : MonoBehaviour
 {
-    // Bu değişkene, item'ı yaratan canavar değer atayacak.
-    private int goldAmount = 0; 
+    private int goldAmount = 0;
     private BaseItem item;
 
-    // Dışarıdan bu loot'un değerini atamak için kullanılacak metot.
-    public void SetLootValue(int amount)
+    public void SetGoldValue(int amount)
     {
         goldAmount = amount;
     }
@@ -15,26 +13,29 @@ public class LootItem : MonoBehaviour
     public void SetItem(BaseItem itemToSet)
     {
         item = itemToSet;
-        // TODO: Eşyanın ikonuna göre yerdeki görünüşünü değiştirebiliriz.
     }
 
-    // "Trigger" olarak ayarlanmış bir collider'a başka bir collider girdiğinde bu metot tetiklenir.
     private void OnTriggerEnter(Collider other)
     {
+        // Bize çarpan nesne oyuncu mu?
+        Debug.Log("LootItem OnTriggerEnter: " + other.name);
         if (other.CompareTag("Player"))
         {
-            // Eğer altın varsa, altını ekle.
+            Debug.Log("LootItem OnTriggerEnter: Player detected");
+            // Eğer altın varsa, altını oyuncunun PlayerStats script'ine ekle.
             if (goldAmount > 0)
             {
+                // GetComponent null dönerse hata vermemesi için '?' kullanıyoruz.
                 other.GetComponent<PlayerStats>()?.AddGold(goldAmount);
             }
 
-            // Eğer eşya varsa, envantere ekle.
+            // Eğer eşya varsa, onu InventoryManager'a ekle.
             if (item != null)
             {
                 InventoryManager.Instance.AddItem(item);
             }
-            
+
+            // Loot toplandığı için bu nesneyi yok et.
             Destroy(gameObject);
         }
     }
