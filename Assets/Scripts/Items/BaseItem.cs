@@ -13,7 +13,7 @@ public abstract class BaseItem : ScriptableObject
     [Header("Temel Eşya Bilgileri")]
     public string itemName;
     [TextArea] public string itemDescription;
-    public Sprite itemIcon; // Envanterde görünecek ikon
+    public Sprite itemIcon;// Envanterde görünecek ikon
     public ItemType type;
 
     // "virtual" anahtar kelimesi, bu metodun alt sınıflar tarafından ezilebileceğini (override) belirtir.

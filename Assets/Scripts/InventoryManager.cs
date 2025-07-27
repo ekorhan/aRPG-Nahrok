@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using System; // Action (event) için bu satır gerekli!
 
 public class InventoryManager : MonoBehaviour
 {
@@ -9,6 +10,8 @@ public class InventoryManager : MonoBehaviour
     // Envanterdeki eşyaların listesi
     public List<BaseItem> items = new List<BaseItem>();
 
+    // Envanter değiştiğinde tetiklenecek olay.
+    public event Action OnInventoryChanged;
     private void Awake()
     {
         // Singleton kurulumu
@@ -27,7 +30,7 @@ public class InventoryManager : MonoBehaviour
     {
         items.Add(item);
         Debug.Log(item.itemName + " envantere eklendi!");
-        // TODO: Envanter arayüzünü (UI) güncelle.
+        OnInventoryChanged?.Invoke();
     }
 
     public void RemoveItem(BaseItem item)
@@ -36,7 +39,7 @@ public class InventoryManager : MonoBehaviour
         {
             items.Remove(item);
             Debug.Log(item.itemName + " envanterden silindi.");
-            // TODO: Envanter arayüzünü (UI) güncelle.
+            OnInventoryChanged?.Invoke();
         }
     }
     public void UseFirstConsumable(BaseCharacter user)
