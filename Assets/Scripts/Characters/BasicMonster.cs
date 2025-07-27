@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections.Generic; // Listeler için bu satır gerekli!
 
 public class BasicMonster : BaseCharacter
 {
@@ -6,15 +7,17 @@ public class BasicMonster : BaseCharacter
     [SerializeField] private int experienceAmount = 10; // Bu canavar öldüğünde verilecek XP miktarı
     [SerializeField] private GameObject goldLootPrefab; // Yaratılacak altın nesnesinin prefab'ı
     [SerializeField] private int goldDropAmount = 25;   // Düşecek altın miktarı
-
-    [SerializeField] private BaseItem itemToDrop; // Düşürülecek eşya (ScriptableObject)
+    // Tek bir eşya yerine, bir eşya listesi (Ganimet Tablosu)
+    [SerializeField] private List<BaseItem> possibleLoot;
+    [Range(0, 1)] // 0 ile 1 arasında bir yüzde değeri
+    [SerializeField] private float itemDropChance = 0.5f; // Eşya düşürme ihtimali (%50)
 
     private Transform player;
 
     protected override void Awake()
     {
-        base.Awake(); // BaseCharacter'daki Awake'i çağırmayı unutmuyoruz!
-        player = GameObject.FindGameObjectWithTag("Player").transform;
+        base.Awake();
+        player = GameObject.FindGameObjectWithTag("Player")?.transform;
     }
 
     void Update()
@@ -51,10 +54,27 @@ public class BasicMonster : BaseCharacter
         }
 
         // Eşya Düşürme
-        if (itemToDrop != null && goldLootPrefab != null) // goldLootPrefab kontrolü ekledik.
+        if (Random.value <= itemDropChance)
         {
-            GameObject lootObject = Instantiate(goldLootPrefab, transform.position + new Vector3(1, 0, 0), Quaternion.identity);
-            lootObject.GetComponent<LootItem>()?.SetItem(itemToDrop);
+            // Ganimet tablosu boş değilse...
+            if (possibleLoot != null && possibleLoot.Count > 0)
+            {
+                // Listeden rastgele bir eşya seç.
+                BaseItem itemToDrop = possibleLoot[Random.Range(0, possibleLoot.Count)];
+                BaseItem itemToDrop1 = possibleLoot[Random.Range(0, possibleLoot.Count)];
+                BaseItem itemToDrop2 = possibleLoot[Random.Range(0, possibleLoot.Count)];
+
+                // Seçilen eşyayı yarat.
+                if (itemToDrop != null && goldLootPrefab != null)
+                {
+                    GameObject lootObject = Instantiate(goldLootPrefab, transform.position + new Vector3(1, 0, 0), Quaternion.identity);
+                    lootObject.GetComponent<LootItem>()?.SetItem(itemToDrop);
+                    GameObject lootObject1 = Instantiate(goldLootPrefab, transform.position + new Vector3(1, 0, 0), Quaternion.identity);
+                    lootObject1.GetComponent<LootItem>()?.SetItem(itemToDrop1);
+                    GameObject lootObject2 = Instantiate(goldLootPrefab, transform.position + new Vector3(1, 0, 0), Quaternion.identity);
+                    lootObject2.GetComponent<LootItem>()?.SetItem(itemToDrop2);
+                }
+            }
         }
 
         // base.Die() metodunu en son çağırıyoruz.

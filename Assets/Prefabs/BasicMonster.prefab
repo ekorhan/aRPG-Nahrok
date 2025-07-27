@@ -128,7 +128,13 @@ MonoBehaviour:
   goldLootPrefab: {fileID: 3498908228083953196, guid: 4115280ae3f35f04d87803b4f30a0a7c,
     type: 3}
   goldDropAmount: 25
-  itemToDrop: {fileID: 11400000, guid: f06ff03815dd6814abccbf9c6203cd91, type: 2}
+  possibleLoot:
+  - {fileID: 11400000, guid: f694efcd49f54e548a01be55354c2e7d, type: 2}
+  - {fileID: 11400000, guid: df2114d015599944eb4ee967f610d56f, type: 2}
+  - {fileID: 11400000, guid: f06ff03815dd6814abccbf9c6203cd91, type: 2}
+  - {fileID: 11400000, guid: 93c2ce36ed9eec546b49e806cf8671e9, type: 2}
+  - {fileID: 11400000, guid: 31d77e386672e3346a7d42bb6b5e6bdd, type: 2}
+  itemDropChance: 1
 --- !u!54 &-9169112496753246068
 Rigidbody:
   m_ObjectHideFlags: 0

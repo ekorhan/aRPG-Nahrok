@@ -46,16 +46,16 @@ public class InventoryUI : MonoBehaviour
         // 2. InventoryManager'daki her bir eşya için yeni bir slot yarat.
         foreach (BaseItem item in inventoryManager.items)
         {
-            GameObject newSlot = Instantiate(slotPrefab, slotsGridParent);
+            // Slot prefab'ını yarat.
+            GameObject newSlotObject = Instantiate(slotPrefab, slotsGridParent);
 
-            // Slot'un içindeki ItemIcon resmini bul ve eşyanın ikonuyla değiştir.
-            Image itemIcon = newSlot.transform.Find("ItemIcon").GetComponent<Image>();
-            itemIcon.sprite = item.itemIcon;
-            itemIcon.color = Color.white; // Resmi görünür yap.
+            // Üzerindeki InventorySlot script'ini al.
+            InventorySlot newSlot = newSlotObject.GetComponent<InventorySlot>();
 
-            Debug.Log(item.itemName + " için slot yaratıldı.");
+            // Eşyayı bu yeni slota ata.
+            newSlot.AddItem(item);
 
-            activeSlots.Add(newSlot);
+            activeSlots.Add(newSlotObject);
         }
     }
 }
